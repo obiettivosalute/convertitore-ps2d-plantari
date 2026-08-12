@@ -206,15 +206,34 @@ di appoggio.
 
 ---
 
-## 7. Cosa resta da verificare
+## 7. Dove si colloca il PS2D nel flusso di lavoro
 
-Il generatore produce pacchetti **formalmente conformi** a quanto decodificato:
-stessi header, stessa griglia, stessa convenzione delle quote, stessi sei
-layer per piede, stessa struttura degli ZIP. Resta da confermare sul campo
-**come il software della fresa interpreta il contenuto**: se lo tratta come
-geometria finita da lavorare, oppure come scansione di un piede su cui
-costruire il plantare secondo le proprie regole. Nel secondo caso il file
-verrebbe letto senza errori ma il pezzo uscirebbe diverso da quello atteso.
+Il `.ps2d` **non è il file che va alla fresa**: è l'input del software di
+modellazione. Il programma importa lo ZIP, crea il paziente e apre le
+immagini della scansione; il plantare si disegna lì dentro, e solo alla fine
+il pezzo viene mandato alla macchina.
 
-La verifica richiede una prova reale sulla macchina. Vedi
-`obsidian/03-Anomalie/Verifiche aperte.md`.
+Chi genera pacchetti con questi strumenti sta quindi facendo entrare nel
+flusso una **scansione di piede** acquisita altrove — con uno scanner
+diverso, o partendo da un calco. Il contenuto è dello stesso tipo di quello
+prodotto dallo scanner nativo, e il software si comporta come sempre.
+
+Due avvertenze pratiche, per le scansioni di altra provenienza:
+
+- se il modello è il piede intero, la superficie che serve è la **faccia
+  inferiore**, la pianta: proiettando dall'alto si otterrebbe il dorso;
+- l'orientamento può differire da quello atteso, quindi vanno previste
+  rotazione e specchiatura, da controllare sull'anteprima.
+
+## 8. Cosa resta da verificare
+
+Il generatore produce pacchetti **formalmente conformi** a quanto
+decodificato: stessi header, stessa griglia, stessa convenzione delle quote,
+stessi sei layer per piede, stessa struttura degli ZIP. Resta da confermare
+che il software di modellazione li apra senza errori, cosa che nessuna
+analisi dei file può stabilire.
+
+Lo strumento `strumenti/genera_prova_import.py` serve a questo: costruisce un
+pacchetto dalla geometria di una scansione autentica, riletta e riscritta per
+intero, con anagrafica di fantasia. Se il software lo apre come apre
+l'originale, il formato è validato.

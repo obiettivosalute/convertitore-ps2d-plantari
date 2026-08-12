@@ -1,33 +1,48 @@
 # Verifiche aperte
 
-## V1 — Come la fresa interpreta un PS2D che contiene un plantare
+## V1 — Il software accetta i pacchetti che generiamo? *(chiarita in parte)*
 
-**La questione.** Il formato PS2D nasce per trasportare la **scansione di un
-piede**: è questo che contengono i pacchetti autentici esaminati. Il
-gestionale ci mette dentro un **plantare già modellato**. Il file è
-formalmente identico, ma il significato di ciò che trasporta è diverso.
+**Come funziona davvero il flusso** (chiarito il 12 agosto 2026). Il `.ps2d`
+non è il file che va alla fresa: è **l'input del software di modellazione**
+fornito dall'azienda. Il programma importa lo ZIP, crea il paziente, apre le
+immagini della scansione; la modellazione del plantare avviene lì dentro, e
+solo alla fine un pulsante manda il pezzo alla macchina.
 
-Due scenari:
+**Cosa cade, di conseguenza.** Il timore dello "spessore aggiunto due volte"
+non si applica al caso d'uso reale: nel gestionale si caricano **scansioni di
+piedi** acquisite con un altro scanner, non plantari già modellati. Il
+pacchetto generato contiene quindi la stessa cosa che contengono quelli dello
+scanner nativo, e il software fa il lavoro che fa sempre.
 
-1. il software della fresa tratta il `.ps2d` come geometria da lavorare —
-   tutto a posto, il pezzo esce come il modello caricato;
-2. lo tratta come piede scansionato e ci costruisce sopra il plantare
-   applicando le proprie regole — il file viene letto senza errori ma il
-   pezzo esce **diverso**, probabilmente con lo spessore aggiunto due volte.
+**Cosa resta da verificare.** Solo la conformità formale: che il programma
+apra senza errori un pacchetto scritto da noi. Non è più una questione di
+interpretazione ma di accettazione del file.
 
-**Perché non si può risolvere dai file.** Nessuna analisi dei pacchetti può
-dire cosa fa il programma che li legge. Serve una prova sulla macchina.
+**Come verificare.** `strumenti/genera_prova_import.py` costruisce un
+pacchetto partendo dalla geometria di una scansione autentica, riletta e
+ripassata per intero attraverso il generatore, con anagrafica di fantasia
+(PROVA IMPORT, 01.01.2000). Se il software lo apre come apre l'originale, il
+formato è validato: stessa geometria, file interamente riscritto da noi.
 
-**Come verificare.** Generare un pacchetto da un plantare di forma nota,
-aprirlo nel software della fresa e confrontare con il modello di partenza:
-altezza dell'arco, spessore al tallone, lunghezza totale. Se il software
-mostra il pezzo così com'è, scenario 1. Se propone un plantare da costruire,
-scenario 2.
+Se invece dà errore, va annotato **il messaggio esatto**: dice quale campo
+non gli torna. In quel caso serve il programma dell'azienda per capire quali
+controlli esegue in lettura.
 
-**Se si verifica lo scenario 2.** Le strade sono due: generare la superficie
-pre-compensata, sottraendo ciò che il software aggiunge, oppure esportare in
-un altro formato accettato dalla macchina. Va deciso dopo la prova, non
-prima.
+---
+
+## V1b — Orientamento delle scansioni di provenienza diversa
+
+Uno scanner diverso da quello nativo può produrre il piede orientato in
+un altro verso, e se il modello è il piede intero la **pianta è la faccia
+inferiore**, non la superiore: proiettando dall'alto si otterrebbe il dorso.
+
+Nell'interfaccia ci sono quindi la scelta della superficie (predefinita:
+pianta del piede), la rotazione a passi di 90° e la specchiatura, separate
+per lato. L'anteprima serve proprio a questo: l'arco deve risultare
+**rilevato**, non incavato, e la punta orientata come nelle scansioni native.
+
+Da capire alla prima prova con lo scanner reale: quale combinazione è quella
+giusta. Una volta trovata, conviene renderla predefinita in `config.py`.
 
 ---
 

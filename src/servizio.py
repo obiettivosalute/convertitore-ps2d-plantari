@@ -35,6 +35,8 @@ class OpzioniConversione:
     unita: str = "auto"
     ruota_gradi_sx: float = 0.0
     ruota_gradi_dx: float = 0.0
+    specchia_sx: bool = False
+    specchia_dx: bool = False
     passo_obj: int = 3
     genera_zip_invio: bool = True
 
@@ -80,8 +82,7 @@ def prepara_lato(percorso: Path, lato: str, opzioni: OpzioniConversione,
 
         if avanzamento:
             avanzamento(f"{lato}: proiezione sulla griglia")
-        ruota = (opzioni.ruota_gradi_sx if lato == LATO_SX
-                 else opzioni.ruota_gradi_dx)
+        sinistro = lato == LATO_SX
         risultato = converti(
             mesh,
             mm_per_px=opzioni.mm_per_px,
@@ -89,7 +90,9 @@ def prepara_lato(percorso: Path, lato: str, opzioni: OpzioniConversione,
             margine_mm=opzioni.margine_mm,
             superficie=opzioni.superficie,
             unita=opzioni.unita,
-            ruota_gradi=ruota,
+            ruota_gradi=(opzioni.ruota_gradi_sx if sinistro
+                         else opzioni.ruota_gradi_dx),
+            specchia=opzioni.specchia_sx if sinistro else opzioni.specchia_dx,
         )
         esito.risultato = risultato
         esito.avvisi = list(risultato.avvisi) + controlla_plausibilita(risultato)

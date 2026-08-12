@@ -125,7 +125,7 @@ class SchedaConversione(QWidget):
         self.archivio = archivio
         self._thread: QThread | None = None
         self._lavoro = None
-        self._anteprime: dict[str, object] = {}
+        self._in_corso: list[tuple] = []
 
         principale = QVBoxLayout(self)
 
@@ -192,11 +192,19 @@ class SchedaConversione(QWidget):
         self.risoluzione.setValue(0.5)
         self.risoluzione.setSuffix(" mm/pixel")
         self.superficie = QComboBox()
-        self.superficie.addItems(["superiore", "inferiore"])
+        self.superficie.addItem("pianta del piede (faccia inferiore)", "inferiore")
+        self.superficie.addItem("appoggio del plantare (faccia superiore)", "superiore")
+        self.superficie.setToolTip(
+            "Su un piede scansionato intero la pianta è la faccia rivolta\n"
+            "verso il basso. Su un plantare già modellato serve invece la\n"
+            "faccia superiore, quella su cui appoggia il piede.\n"
+            "Controlla l'anteprima: l'arco deve risultare rilevato, non incavato.")
+        self.superficie.currentIndexChanged.connect(self._riconverti)
         self.unita = QComboBox()
         self.unita.addItems(["auto", "mm", "cm", "m"])
+        self.unita.currentIndexChanged.connect(self._riconverti)
         form_op.addRow("Risoluzione", self.risoluzione)
-        form_op.addRow("Faccia da esportare", self.superficie)
+        form_op.addRow("Superficie da usare", self.superficie)
         form_op.addRow("Unità del file", self.unita)
 
         form_op2 = QFormLayout()
@@ -215,8 +223,34 @@ class SchedaConversione(QWidget):
         form_op2.addRow(self.zip_invio)
         form_op2.addRow("Passo mesh OBJ", self.passo_obj)
 
+        # orientamento, separato per lato: scanner diversi appoggiano il
+        # piede in versi diversi, e il software si aspetta punta in alto
+        form_or = QFormLayout()
+        self.rotazione_sx = QComboBox()
+        self.rotazione_dx = QComboBox()
+        for combo in (self.rotazione_sx, self.rotazione_dx):
+            for gradi in (0, 90, 180, 270):
+                combo.addItem(f"{gradi}°", float(gradi))
+            combo.currentIndexChanged.connect(self._riconverti)
+        self.specchia_sx = QCheckBox("specchia")
+        self.specchia_dx = QCheckBox("specchia")
+        for spunta in (self.specchia_sx, self.specchia_dx):
+            spunta.setToolTip("Ribalta il modello, se lo scanner lo produce "
+                              "rovesciato rispetto al lato")
+            spunta.stateChanged.connect(self._riconverti)
+
+        riga_sx = QHBoxLayout()
+        riga_sx.addWidget(self.rotazione_sx)
+        riga_sx.addWidget(self.specchia_sx)
+        riga_dx = QHBoxLayout()
+        riga_dx.addWidget(self.rotazione_dx)
+        riga_dx.addWidget(self.specchia_dx)
+        form_or.addRow("Orientamento SX", riga_sx)
+        form_or.addRow("Orientamento DX", riga_dx)
+
         opzioni.addLayout(form_op)
         opzioni.addLayout(form_op2)
+        opzioni.addLayout(form_or)
         opzioni.addStretch(1)
         principale.addWidget(gruppo_opzioni)
 
@@ -281,11 +315,21 @@ class SchedaConversione(QWidget):
         return OpzioniConversione(
             mm_per_px=self.risoluzione.value(),
             usa_frame_standard=self.frame_standard.isChecked(),
-            superficie=self.superficie.currentText(),
+            superficie=self.superficie.currentData(),
             unita=self.unita.currentText(),
+            ruota_gradi_sx=self.rotazione_sx.currentData(),
+            ruota_gradi_dx=self.rotazione_dx.currentData(),
+            specchia_sx=self.specchia_sx.isChecked(),
+            specchia_dx=self.specchia_dx.isChecked(),
             passo_obj=self.passo_obj.value(),
             genera_zip_invio=self.zip_invio.isChecked(),
         )
+
+    def _riconverti(self) -> None:
+        """Rigenera le anteprime quando cambia un parametro di orientamento."""
+        for lato, zona in ((LATO_SX, self.zona_sx), (LATO_DX, self.zona_dx)):
+            if zona.percorso:
+                self._aggiorna_anteprima(lato, str(zona.percorso))
 
     def _aggiorna_anteprima(self, lato: str, percorso: str) -> None:
         widget = self.anteprima_sx if lato == LATO_SX else self.anteprima_dx
@@ -300,9 +344,20 @@ class SchedaConversione(QWidget):
         lavoro.fallito.connect(self._anteprima_fallita)
         lavoro.finito.connect(thread.quit)
         lavoro.fallito.connect(thread.quit)
-        thread.finished.connect(thread.deleteLater)
-        # riferimenti tenuti in vita finche' il thread lavora
-        self._anteprime[lato] = (thread, lavoro)
+
+        # I riferimenti vanno tenuti vivi lato Python finche' il thread gira,
+        # altrimenti Qt lo distrugge a meta' lavoro. Cambiando in fretta un
+        # parametro si accodano piu' conversioni dello stesso lato: si tiene
+        # una lista e si scarta ciascuna quando ha finito davvero.
+        coppia = (thread, lavoro)
+        self._in_corso.append(coppia)
+
+        def concluso():
+            if coppia in self._in_corso:
+                self._in_corso.remove(coppia)
+            thread.deleteLater()
+
+        thread.finished.connect(concluso)
         thread.start()
 
     def _anteprima_pronta(self, lato: str, esito) -> None:

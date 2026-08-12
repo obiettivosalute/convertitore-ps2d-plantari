@@ -90,8 +90,11 @@ def main() -> int:
         print(f"cliente creato: {cliente.etichetta}")
 
         passi: list[str] = []
+        # i modelli di prova sono plantari, quindi serve la faccia superiore:
+        # per le scansioni di piede si usa invece quella inferiore, la pianta
         esito = esporta(archivio, cliente, sx, dx,
-                        OpzioniConversione(genera_zip_invio=True),
+                        OpzioniConversione(genera_zip_invio=True,
+                                           superficie="superiore"),
                         descrizione="prova automatica",
                         avanzamento=passi.append)
 

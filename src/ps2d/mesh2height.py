@@ -102,11 +102,16 @@ def converti(
     unita: str = "auto",
     centra: bool = True,
     tolleranza_faccia_mm: float | None = None,
+    specchia: bool = False,
 ) -> RisultatoConversione:
     """Proietta la mesh sulla griglia e restituisce le quote in millimetri.
 
-    superficie: "superiore" tiene la faccia rivolta verso l'alto (quella su
-    cui appoggia il piede), "inferiore" quella verso il basso.
+    superficie: "superiore" tiene la faccia rivolta verso l'alto,
+    "inferiore" quella verso il basso. Su un piede scansionato intero la
+    pianta e' quasi sempre la faccia inferiore; su un plantare gia'
+    modellato e' la superiore, dove appoggia il piede.
+    specchia: ribalta l'asse trasversale, per quando lo scanner produce il
+    piede rovesciato rispetto al lato dichiarato.
     unita: "auto" deduce la scala dalle dimensioni, oppure "mm", "cm", "m".
     tolleranza_faccia_mm: spessore della fascia, sotto il punto piu' alto di
     ogni cella, entro cui i campioni sono considerati parte della faccia
@@ -141,6 +146,9 @@ def converti(
 
     if superficie == "inferiore":
         P[:, 2] = -P[:, 2]
+
+    if specchia:
+        P[:, 0] = -P[:, 0]
 
     if ruota_gradi:
         a = np.deg2rad(ruota_gradi)

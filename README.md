@@ -61,13 +61,32 @@ py -3 tests\test_precisione.py <pacchetto.ps2d>
 py -3 tests\test_flusso.py
 ```
 
+## Dove si colloca nel flusso di lavoro
+
+Il `.ps2d` non è il file che va alla fresa: è **l'input del software di
+modellazione**. Quel programma importa lo ZIP, crea il paziente e apre le
+immagini; il plantare si disegna lì dentro e solo alla fine il pezzo va alla
+macchina. Questo gestionale serve quindi a far entrare nel flusso scansioni
+acquisite con **uno scanner diverso** da quello nativo.
+
+Due avvertenze per le scansioni di altra provenienza: se il modello è il
+piede intero la superficie da usare è la **faccia inferiore** — la pianta,
+non il dorso — e l'orientamento può differire, perciò l'interfaccia offre
+rotazione e specchiatura separate per lato. L'anteprima serve a controllarlo:
+l'arco deve risultare rilevato, non incavato.
+
 ## Da verificare
 
-Il generatore produce pacchetti conformi a quanto decodificato. Resta da
-confermare sul campo **come il software della fresa interpreti un PS2D che
-contiene un plantare invece di una scansione di piede**: potrebbe trattarlo
-come geometria finita da lavorare, oppure come piede su cui costruire il
-plantare con le proprie regole. Dettagli in
+Resta da confermare che il software di modellazione apra senza errori un
+pacchetto scritto da questo programma. Lo strumento apposito costruisce un
+file di prova dalla geometria di una scansione autentica, riscritta per
+intero, con anagrafica di fantasia:
+
+```bash
+py -3 strumenti\genera_prova_import.py <pacchetto_originale.ps2d>
+```
+
+Se si apre come l'originale, il formato è validato. Dettagli in
 `obsidian/03-Anomalie/Verifiche aperte.md`.
 
 ## Dati personali
