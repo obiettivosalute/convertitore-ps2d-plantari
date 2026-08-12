@@ -97,6 +97,23 @@ def genera_farima(quote_mm: np.ndarray, maschera: np.ndarray,
     return Image.fromarray(out, mode="RGBA")
 
 
+def _exif_base(larghezza: int, altezza: int) -> bytes:
+    """EXIF minimo con gli stessi campi dei file autentici.
+
+    Negli originali sono presenti: Compression, XResolution, YResolution,
+    ResolutionUnit, YCbCrPositioning, PixelXDimension e PixelYDimension.
+    """
+    exif = Image.Exif()
+    exif[0x0128] = 2          # ResolutionUnit: pollici
+    exif[0x011A] = 72.0       # XResolution
+    exif[0x011B] = 72.0       # YResolution
+    exif[0x0112] = 1          # Orientation
+    exif[0x0213] = 2          # YCbCrPositioning
+    exif[0xA002] = larghezza  # PixelXDimension
+    exif[0xA003] = altezza    # PixelYDimension
+    return exif.tobytes()
+
+
 def genera_bmp(quote_mm: np.ndarray, maschera: np.ndarray,
                mm_per_px: float) -> Image.Image:
     """Anteprima JPEG in scala di grigi, sfondo scuro."""
@@ -108,7 +125,7 @@ def genera_bmp(quote_mm: np.ndarray, maschera: np.ndarray,
 
 # --------------------------------------------------------------- mesh OBJ
 def genera_obj(quote_mm: np.ndarray, maschera: np.ndarray, mm_per_px: float,
-               passo_px: int = 3) -> str:
+               passo_px: int = 4) -> str:
     """Costruisce la mesh Wavefront dalla mappa quote.
 
     Coordinate in metri e assi come li scrive lo scanner: X trasversale,
@@ -156,6 +173,9 @@ def genera_obj(quote_mm: np.ndarray, maschera: np.ndarray, mm_per_px: float,
     for A, B, C, D in zip(a[ok] + 1, b[ok] + 1, c_[ok] + 1, d[ok] + 1):
         righe.append(f"f {A}/{A}/{A} {B}/{B}/{B} {C}/{C}/{C}")
         righe.append(f"f {A}/{A}/{A} {C}/{C}/{C} {D}/{D}/{D}")
+    # I file autentici chiudono con questa riga: se il lettore la usa per
+    # riconoscere un file completo, ometterla lo farebbe scartare.
+    righe.append("# End of file.")
     return "\n".join(righe) + "\n"
 
 
@@ -167,7 +187,7 @@ def _nome_base(paziente: DatiPaziente, lato: str, istante: datetime) -> str:
 def scrivi_lato(cartella: Path, paziente: DatiPaziente, lato: str,
                 quote_mm: np.ndarray, maschera: np.ndarray, mm_per_px: float,
                 mm_per_unita_z: float, valori_sca: np.ndarray,
-                istante: datetime, passo_obj: int = 3) -> list[Path]:
+                istante: datetime, passo_obj: int = 4) -> list[Path]:
     """Scrive i sei file di un piede e restituisce i percorsi.
 
     Il nome contiene la data di nascita puntata, quindi i percorsi vanno
@@ -189,16 +209,23 @@ def scrivi_lato(cartella: Path, paziente: DatiPaziente, lato: str,
                mm_per_px, mm_per_unita_z)
     prodotti.append(percorso("ima"))
 
-    genera_farima(quote_mm, maschera, mm_per_px).save(percorso("farima"),
-                                                      format="PNG")
+    # pHYs e EXIF sono presenti nei file autentici: si replicano per non
+    # discostarsi da cio' che il lettore e' abituato a ricevere. Il chunk
+    # pHYs si ottiene passando dpi al salvataggio: aggiunto a mano fra i
+    # metadati verrebbe scartato, perche' Pillow gestisce da se' i chunk noti.
+    genera_farima(quote_mm, maschera, mm_per_px).save(
+        percorso("farima"), format="PNG", dpi=(72, 72))
     prodotti.append(percorso("farima"))
 
-    genera_bmp(quote_mm, maschera, mm_per_px).save(percorso("bmp"),
-                                                   format="JPEG", quality=88)
+    genera_bmp(quote_mm, maschera, mm_per_px).save(
+        percorso("bmp"), format="JPEG", quality=88, dpi=(72, 72),
+        exif=_exif_base(quote_mm.shape[1], quote_mm.shape[0]))
     prodotti.append(percorso("bmp"))
 
-    percorso("obj").write_text(
-        genera_obj(quote_mm, maschera, mm_per_px, passo_obj), encoding="ascii")
+    # scrittura binaria: l'OBJ autentico usa LF, e su Windows write_text
+    # tradurrebbe ogni a capo in CRLF
+    percorso("obj").write_bytes(
+        genera_obj(quote_mm, maschera, mm_per_px, passo_obj).encode("ascii"))
     prodotti.append(percorso("obj"))
 
     scrivi_his(percorso("his"), paziente.nome, paziente.cognome,
@@ -208,11 +235,24 @@ def scrivi_lato(cartella: Path, paziente: DatiPaziente, lato: str,
     return prodotti
 
 
+# Ordine con cui i layer compaiono nei pacchetti autentici: non sono
+# raggruppati per piede, e l'estensione .ima apre l'archivio. Non e' detto
+# che il lettore ci badi, ma somigliare all'originale costa nulla.
+ORDINE_LAYER = ["ima", "bmp", "his", "obj", "farima", "sca"]
+
+
+def _chiave_ordine(percorso: Path) -> tuple:
+    ext = percorso.suffix.lstrip(".").lower()
+    posizione = ORDINE_LAYER.index(ext) if ext in ORDINE_LAYER else len(ORDINE_LAYER)
+    lato = 0 if f"_{LATO_SX}_" in percorso.name else 1
+    return (posizione, lato)
+
+
 def impacchetta_ps2d(destinazione: Path, file_da_includere: list[Path]) -> Path:
     """Crea il .ps2d, che e' uno ZIP con dentro i layer dei due piedi."""
     destinazione.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(destinazione, "w", zipfile.ZIP_DEFLATED) as z:
-        for f in file_da_includere:
+        for f in sorted(file_da_includere, key=_chiave_ordine):
             z.write(f, arcname=f.name)
     return destinazione
 

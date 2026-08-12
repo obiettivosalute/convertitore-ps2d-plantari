@@ -228,7 +228,7 @@ class SchedaConversione(QWidget):
         self.zip_invio.setChecked(True)
         self.passo_obj = QSpinBox()
         self.passo_obj.setRange(1, 12)
-        self.passo_obj.setValue(3)
+        self.passo_obj.setValue(4)
         self.passo_obj.setToolTip("Passo di campionamento della mesh OBJ, in pixel")
         form_op2.addRow(self.frame_standard)
         form_op2.addRow(self.ritaglia)

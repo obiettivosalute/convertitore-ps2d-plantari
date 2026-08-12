@@ -24,7 +24,14 @@ ripassata per intero attraverso il generatore, con anagrafica di fantasia
 (PROVA IMPORT, 01.01.2000). Se il software lo apre come apre l'originale, il
 formato è validato: stessa geometria, file interamente riscritto da noi.
 
-### Stato: pacchetto consegnato al tecnico il 12 agosto 2026
+### Stato: prima prova fatta, import rifiutato al terzo passo
+
+Il pacchetto viene accettato e il paziente creato, ma le immagini non si
+aprono: *«La scansione non può essere aperta!»*. L'indagine, il confronto
+con i file autentici e le correzioni applicate stanno in
+[[Import rifiutato - indagine]].
+
+### Cronologia: primo pacchetto consegnato il 12 agosto 2026
 
 File inviato: `Obiettivo Salute_Prova-Import_-01.01.2000-12.08.2026-PROVA1.zip`
 (1,1 MB, entrambi i piedi). Riproducibile in qualsiasi momento rilanciando lo

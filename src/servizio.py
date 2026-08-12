@@ -40,7 +40,8 @@ class OpzioniConversione:
     specchia_dx: bool = False
     ritaglia_piano: bool = True
     margine_ritaglio_mm: float = 4.0
-    passo_obj: int = 3
+    # 4 px = 2 mm: dà una mesh di densità simile a quella dei file autentici
+    passo_obj: int = 4
     genera_zip_invio: bool = True
 
 

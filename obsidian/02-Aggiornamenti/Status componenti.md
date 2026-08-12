@@ -2,10 +2,10 @@
 
 Aggiornato al 12 agosto 2026.
 
-> **In attesa di riscontro**: il pacchetto di prova è stato consegnato al
-> tecnico il 12 agosto. Finché non si sa se il software di modellazione lo
-> importa, tutto il resto resta in sospeso — vedi [[Verifiche aperte]] per
-> cosa farsi riferire.
+> **Prima prova fatta, non superata.** Il pacchetto viene accettato e il
+> paziente creato correttamente, ma le immagini non si aprono. Le difformità
+> rispetto ai file autentici sono state trovate e corrette; due nuovi
+> pacchetti sono in prova. Vedi [[Import rifiutato - indagine]].
 
 | Componente | File | Stato | Note |
 |---|---|---|---|
@@ -20,8 +20,9 @@ Aggiornato al 12 agosto 2026.
 | Riconoscimento del verso | `src/ps2d/mesh2height.py` | **fatto** | criterio sull'asimmetria delle quote |
 | Ritaglio del piano | `src/ps2d/ritaglio.py` | **fatto** | con salvaguardie contro i falsi allarmi |
 | Strumento di prova import | `strumenti/genera_prova_import.py` | **fatto** | rigenera un pacchetto da una scansione autentica |
+| Strumento di controllo | `strumenti/genera_prova_controllo.py` | **fatto** | originale con la sola anagrafica cambiata, per isolare il guasto |
 | Documentazione formato | `docs/FORMATO_PS2D.md` | **fatto** | specifica completa |
-| Prova di import | — | **consegnata** | in attesa del riscontro del tecnico |
+| Prova di import | — | **in corso** | primo tentativo fallito al caricamento dei layer, correzioni applicate |
 | Taratura su calco vero | — | **da fare** | soglie del ritaglio e orientamento dello scanner |
 | Acquisizione diretta (fase 2) | — | **da fare** | dipende dallo scanner, non ancora acquistato |
 | Aggancio a `prese misure` | — | **da fare** | anagrafica in sola lettura |

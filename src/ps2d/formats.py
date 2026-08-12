@@ -127,14 +127,17 @@ def scrivi_his(path: Path, nome: str, cognome: str, data_nascita: str,
     proprio e VNAME il cognome, all'inverso di quanto suggerirebbe il
     tedesco. `data_nascita` va nel formato GG.MM.AAAA.
     """
+    # I file autentici usano solo LF e non terminano con un a capo: 109 byte
+    # esatti nei riferimenti. Si scrive in binario per non lasciare che sia
+    # la piattaforma a decidere i terminatori.
     testo = (
         f'USERDATA="NAME={nome}","VNAME={cognome}","GEBDAT={data_nascita}"\n'
         f"KONTRAST={contrasto:.6f}\n"
         f"HELLIGKEIT={luminosita}\n"
         f"INVERT={invert}\n"
-        f"3DSCAN={scan3d}\n"
+        f"3DSCAN={scan3d}"
     )
-    Path(path).write_text(testo, encoding="ascii", newline="\r\n")
+    Path(path).write_bytes(testo.encode("ascii"))
 
 
 def leggi_his(path: Path) -> dict:

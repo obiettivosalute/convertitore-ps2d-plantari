@@ -98,11 +98,14 @@ quindi si tratta dell'immagine ottica della camera, non della profondità.
 **`.farima`** — PNG RGBA con la foto a colori della pianta. Il canale alfa
 è la maschera dei pixel validi e coincide con le celle non-sfondo del
 `.sca`. Nei file reali il colore medio dell'area opaca è intorno a
-(103, 114, 122), cioè pelle in luce fredda.
+(103, 114, 122), cioè pelle in luce fredda. Porta il chunk **`pHYs`** a
+72 dpi: con Pillow lo si ottiene passando `dpi` al salvataggio, perché i
+chunk noti aggiunti a mano fra i metadati vengono scartati.
 
 **`.bmp`** — Malgrado il nome è un **JPEG** in scala di grigi con EXIF, non
 un bitmap. Sfondo scuro, correlazione negativa con il `.sca` (−0,70): è una
-resa ombreggiata della profondità, buona come anteprima.
+resa ombreggiata della profondità, buona come anteprima. I file autentici
+portano i segmenti `FFE1` (EXIF), `FFED` e `FFDD`.
 
 **`.obj`** — Mesh Wavefront standard con normali e coordinate UV.
 Coordinate **in metri**. Assi: X trasversale, **Y verticale**, Z
@@ -112,12 +115,18 @@ sull'origine, con circa 11.000 vertici (passo di campionamento intorno ai
 3 mm). Dichiara `mtllib Model.mtl`, ma quel file **non è nel pacchetto**:
 la texture va agganciata a mano al `.farima`.
 
+Apre con `# Generated.` e **chiude con `# End of file.`**, terminatori LF.
+Quella riga finale va replicata: se il lettore la usa per riconoscere un
+file completo, ometterla lo farebbe scartare come troncato.
+
 La superficie dell'`.obj` è la stessa del `.sca` con l'asse verticale
 invertito e ricentrato: sui file reali la correlazione fra i due è −0,91
 (sinistro) e −0,84 (destro), e l'escursione coincide (54,2 mm contro
 54,46 mm). Non sono due acquisizioni diverse, sono lo stesso dato.
 
-**`.his`** — Testo ASCII con terminatori CRLF:
+**`.his`** — Testo ASCII con terminatori **LF**, e **senza a capo finale**:
+109 byte esatti nei riferimenti. Su Windows va scritto in binario, altrimenti
+la piattaforma traduce ogni a capo in CRLF.
 
 ```
 USERDATA="NAME=Anna","VNAME=Verdi","GEBDAT=04.11.1982"
