@@ -24,9 +24,32 @@ ripassata per intero attraverso il generatore, con anagrafica di fantasia
 (PROVA IMPORT, 01.01.2000). Se il software lo apre come apre l'originale, il
 formato è validato: stessa geometria, file interamente riscritto da noi.
 
-Se invece dà errore, va annotato **il messaggio esatto**: dice quale campo
-non gli torna. In quel caso serve il programma dell'azienda per capire quali
-controlli esegue in lettura.
+### Stato: pacchetto consegnato al tecnico il 12 agosto 2026
+
+File inviato: `Obiettivo Salute_Prova-Import_-01.01.2000-12.08.2026-PROVA1.zip`
+(1,1 MB, entrambi i piedi). Riproducibile in qualsiasi momento rilanciando lo
+strumento sul pacchetto originale.
+
+**Cosa serve sapere al ritorno**, in ordine di importanza:
+
+1. **Lo ZIP viene accettato in importazione?** È la domanda principale. Se
+   il programma lo rifiuta subito, il problema è nell'involucro: manifest,
+   nome dell'archivio o struttura.
+2. **Il paziente PROVA IMPORT compare in elenco?** Se sì, il `.his` è stato
+   letto correttamente, quindi nome, cognome e data di nascita passano.
+3. **Le immagini si aprono?** Se il paziente c'è ma le immagini no, il
+   problema è nei layer: `.sca`, `.ima` o `.farima`.
+4. **La forma dei piedi è giusta?** Non capovolta, non deformata, non
+   specchiata. Qui si vede se griglia e fattori di scala sono corretti.
+5. **Si arriva alla modellazione?** È la conferma definitiva.
+
+Se compare un errore va trascritto **alla lettera**: il messaggio dice quale
+campo non torna, e senza quello si procede per tentativi. In quel caso serve
+il programma dell'azienda per esaminare quali controlli esegue in lettura.
+
+**Nota sui dati.** Il pacchetto porta l'anagrafica di fantasia, ma la
+geometria è quella di una scansione reale: nessun dato identificativo, però
+resta un piede vero. Va cancellato dal software a prova conclusa.
 
 ---
 

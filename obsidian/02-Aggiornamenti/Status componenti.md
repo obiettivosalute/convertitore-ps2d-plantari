@@ -2,6 +2,11 @@
 
 Aggiornato al 12 agosto 2026.
 
+> **In attesa di riscontro**: il pacchetto di prova è stato consegnato al
+> tecnico il 12 agosto. Finché non si sa se il software di modellazione lo
+> importa, tutto il resto resta in sospeso — vedi [[Verifiche aperte]] per
+> cosa farsi riferire.
+
 | Componente | File | Stato | Note |
 |---|---|---|---|
 | Header e layer binari | `src/ps2d/formats.py` | **fatto** | firma, griglia, fattori di scala, `.his` |
@@ -12,8 +17,13 @@ Aggiornato al 12 agosto 2026.
 | Orchestrazione | `src/servizio.py` | **fatto** | indipendente da Qt |
 | Interfaccia | `src/gui/` | **fatto** | tre schede, conversione in thread separato |
 | Prove | `tests/` | **fatto** | precisione, round-trip, flusso |
+| Riconoscimento del verso | `src/ps2d/mesh2height.py` | **fatto** | criterio sull'asimmetria delle quote |
+| Ritaglio del piano | `src/ps2d/ritaglio.py` | **fatto** | con salvaguardie contro i falsi allarmi |
+| Strumento di prova import | `strumenti/genera_prova_import.py` | **fatto** | rigenera un pacchetto da una scansione autentica |
 | Documentazione formato | `docs/FORMATO_PS2D.md` | **fatto** | specifica completa |
-| Prova sulla fresa | — | **da fare** | l'unica verifica che manca davvero |
+| Prova di import | — | **consegnata** | in attesa del riscontro del tecnico |
+| Taratura su calco vero | — | **da fare** | soglie del ritaglio e orientamento dello scanner |
+| Acquisizione diretta (fase 2) | — | **da fare** | dipende dallo scanner, non ancora acquistato |
 | Aggancio a `prese misure` | — | **da fare** | anagrafica in sola lettura |
 
 ## Dettaglio delle prove
