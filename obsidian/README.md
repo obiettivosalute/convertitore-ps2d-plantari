@@ -20,6 +20,19 @@ pacchetto sia rigenerabile in futuro.
 | `03-Anomalie` | Problemi noti e verifiche ancora aperte |
 | `04-Roadmap` | Cosa manca e in che ordine |
 
+## A che punto siamo — 12 agosto 2026
+
+Il gestionale è completo e collaudato. Manca la conferma che il software di
+modellazione accetti i pacchetti generati: alla prima prova lo ZIP viene
+accettato e il paziente creato correttamente, ma le immagini non si aprono.
+Le difformità rispetto ai file autentici sono state trovate e corrette, e
+**due pacchetti sono in prova presso il tecnico**.
+
+Alla ripresa, la prima domanda da fare è quale dei due — CONTROLLO FORMATO o
+PROVA IMPORT — ha dato quale esito: la tabella in
+[[2026-08-12 - Sessione 3, prima prova di import]] dice come proseguire in
+ciascun caso.
+
 ## Punti fermi
 
 - Il formato PS2D è stato ricostruito per reverse engineering: la specifica

@@ -1,11 +1,17 @@
 # Roadmap
 
-## Adesso — la prova di import
+## Adesso — la prova di import, secondo giro
 
-Va chiusa [[Verifiche aperte|V1]]: importare nel software di modellazione il
-pacchetto prodotto da `strumenti/genera_prova_import.py`. È l'unica verifica
-possibile finché non arriva lo scanner, e conferma che i file scritti da noi
-siano accettati.
+Il primo tentativo si è fermato al caricamento dei layer. Due pacchetti sono
+in prova presso il tecnico — CONTROLLO FORMATO e PROVA IMPORT — e il
+confronto fra i loro esiti dice da che parte guardare. Vedi
+[[Import rifiutato - indagine]].
+
+Se servisse il terzo giro, conviene scrivere uno strumento che generi in un
+colpo solo la serie dei pacchetti ibridi: si parte da quello di controllo e
+si sostituisce **un layer alla volta** con quello generato, così una sola
+consegna copre tutte le combinazioni invece di sei giri di posta. Il primo
+layer da mettere alla prova è l'`.obj`.
 
 ---
 
