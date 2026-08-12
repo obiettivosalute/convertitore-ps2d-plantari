@@ -1,0 +1,50 @@
+# ---------------------------------------------------------------------------
+# DATI DEI PAZIENTI — non devono mai finire nel repository.
+# Nome, cognome, data di nascita e conformazione del piede sono dati sanitari.
+# ---------------------------------------------------------------------------
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# identificativi della postazione presso il portale
+config_locale.py
+
+# pacchetti e modelli 3D, ovunque si trovino
+*.ps2d
+*.sca
+*.ima
+*.farima
+*.his
+*.stl
+*.obj
+*.ply
+*.3mf
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---------------------------------------------------------------------------
+# Sistema ed editor
+# ---------------------------------------------------------------------------
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
+
+# ---------------------------------------------------------------------------
+# Obsidian: si versionano le note, non lo stato dell'applicazione
+# ---------------------------------------------------------------------------
+obsidian/.obsidian/
+obsidian/.trash/
