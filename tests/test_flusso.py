@@ -90,11 +90,15 @@ def main() -> int:
         print(f"cliente creato: {cliente.etichetta}")
 
         passi: list[str] = []
-        # i modelli di prova sono plantari, quindi serve la faccia superiore:
-        # per le scansioni di piede si usa invece quella inferiore, la pianta
+        # I modelli di prova sono plantari, quindi serve la faccia superiore:
+        # per le scansioni di piede si usa invece quella inferiore, la pianta.
+        # Il ritaglio resta acceso di proposito: un plantare ha una base
+        # piatta estesa che somiglia a un piano d'appoggio, e qui si verifica
+        # che le salvaguardie impediscano di scambiarla per tale.
         esito = esporta(archivio, cliente, sx, dx,
                         OpzioniConversione(genera_zip_invio=True,
-                                           superficie="superiore"),
+                                           superficie="superiore",
+                                           ritaglia_piano=True),
                         descrizione="prova automatica",
                         avanzamento=passi.append)
 
@@ -137,6 +141,8 @@ def main() -> int:
                  for v in letto.lati.values()), "griglia standard"),
             (all(14.0 < v.escursione_mm < 26.0
                  for v in letto.lati.values()), "rilievo plausibile"),
+            (not any("tolto il piano" in a for a in esito.avvisi),
+             "la base piatta del plantare non viene scambiata per un piano"),
         ]
         print()
         ok = True

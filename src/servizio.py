@@ -21,6 +21,7 @@ from .ps2d import (DatiPaziente, carica_mesh, controlla_plausibilita, converti,
                    impacchetta_invio, impacchetta_ps2d, nome_archivio_invio,
                    quantizza, scrivi_lato)
 from .ps2d.mesh2height import RisultatoConversione
+from .ps2d.ritaglio import applica, isola_impronta
 
 
 @dataclass
@@ -37,6 +38,8 @@ class OpzioniConversione:
     ruota_gradi_dx: float = 0.0
     specchia_sx: bool = False
     specchia_dx: bool = False
+    ritaglia_piano: bool = True
+    margine_ritaglio_mm: float = 4.0
     passo_obj: int = 3
     genera_zip_invio: bool = True
 
@@ -94,6 +97,18 @@ def prepara_lato(percorso: Path, lato: str, opzioni: OpzioniConversione,
                          else opzioni.ruota_gradi_dx),
             specchia=opzioni.specchia_sx if sinistro else opzioni.specchia_dx,
         )
+        if opzioni.ritaglia_piano:
+            if avanzamento:
+                avanzamento(f"{lato}: ricerca del piano da togliere")
+            ritaglio = isola_impronta(
+                risultato.quote_mm, risultato.maschera,
+                margine_mm=opzioni.margine_ritaglio_mm,
+                mm_per_px=opzioni.mm_per_px)
+            if ritaglio.applicato:
+                risultato.quote_mm = applica(risultato.quote_mm, ritaglio)
+                risultato.maschera = ritaglio.maschera
+            risultato.avvisi.append(ritaglio.motivo)
+
         esito.risultato = risultato
         esito.avvisi = list(risultato.avvisi) + controlla_plausibilita(risultato)
 

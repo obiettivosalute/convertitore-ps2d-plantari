@@ -66,14 +66,26 @@ py -3 tests\test_flusso.py
 Il `.ps2d` non è il file che va alla fresa: è **l'input del software di
 modellazione**. Quel programma importa lo ZIP, crea il paziente e apre le
 immagini; il plantare si disegna lì dentro e solo alla fine il pezzo va alla
-macchina. Questo gestionale serve quindi a far entrare nel flusso scansioni
-acquisite con **uno scanner diverso** da quello nativo.
+macchina.
 
-Due avvertenze per le scansioni di altra provenienza: se il modello è il
-piede intero la superficie da usare è la **faccia inferiore** — la pianta,
-non il dorso — e l'orientamento può differire, perciò l'interfaccia offre
-rotazione e specchiatura separate per lato. L'anteprima serve a controllarlo:
-l'arco deve risultare rilevato, non incavato.
+Questo gestionale sostituisce lo scanner dedicato quando non è più
+disponibile: si scansiona il piede — o il suo calco in schiuma — con un
+qualunque scanner 3D che esporti STL, OBJ o PLY, e da lì si ottiene il
+pacchetto che il software di modellazione si aspetta.
+
+Due controlli automatici sollevano dall'indovinare le impostazioni:
+
+**Verso della superficie.** Uno scanner diverso può orientare l'asse
+verticale al contrario, e una mappa rovesciata non salta all'occhio: sembra
+solo un altro piede. Sotto ogni anteprima il programma dichiara se il verso è
+giusto — le zone di appoggio devono risultare rosse e l'arco blu — e nei casi
+dubbi lo dice invece di tirare a indovinare.
+
+**Piano di appoggio.** Scansionando un calco entra anche la superficie piana
+del blocco attorno all'impronta. Il programma la riconosce e la toglie, ma si
+ferma se ciò che resterebbe è troppo piccolo per essere un'impronta o se
+butterebbe via la maggior parte dell'acquisito: un plantare già modellato ha
+una base piatta che somiglia molto a un piano d'appoggio.
 
 ## Da verificare
 

@@ -65,6 +65,45 @@ controlaterale costringerebbe a inventare un file.
 
 ---
 
+## D5b — Riconoscimento del verso invece di un'impostazione da ricordare
+
+**Decisione.** Sotto ogni anteprima il programma dichiara se la superficie è
+orientata nel verso giusto, invece di lasciarlo capire all'operatore.
+
+**Perché.** Chi importa da uno scanner diverso non può sapere in anticipo
+come è orientato l'asse verticale, e una mappa rovesciata non è evidente a
+colpo d'occhio: sembra semplicemente un altro piede.
+
+**Come.** Le zone di appoggio occupano gran parte dell'area e stanno vicine
+al sensore, l'arco è una minoranza che se ne allontana: la distribuzione
+delle quote è quindi molto asimmetrica. Sulla scansione di riferimento, 81%
+dell'area nella metà alta e asimmetria −1,31; rovesciando l'asse diventano
+19% e +1,31. Le soglie (60%/−0,30 e 40%/+0,30) lasciano in mezzo una fascia
+di incertezza in cui il programma dichiara di non sapere, invece di tirare a
+indovinare — ed è quello che succede sul piede sinistro del pacchetto di
+riferimento, dove il piano d'appoggio acquisito falsa la distribuzione.
+
+---
+
+## D5c — Il ritaglio del piano si ferma quando rischia di fare danni
+
+**Decisione.** L'isolamento dell'impronta dal piano circostante non viene
+applicato se ciò che resterebbe è più piccolo di 100 cm², o se si butterebbe
+via oltre il 70% dell'area acquisita.
+
+**Perché.** Serve per i calchi in schiuma, dove entra tutto il blocco insieme
+all'impronta. Ma un plantare già modellato ha spesso una base piatta estesa
+che somiglia moltissimo a un piano d'appoggio: senza salvaguardie il ritaglio
+teneva solo la gobba dell'arco, buttando via il 78% del modello. Meglio non
+intervenire e spiegare perché, che intervenire male.
+
+**Verificato su.** Il pacchetto di riferimento contiene i due casi opposti:
+sul piede sinistro il piano viene tolto e la lunghezza torna da 295 a 254 mm,
+coerente con il destro (249 mm); sul destro, già pulito, il ritaglio non
+interviene.
+
+---
+
 ## D6 — I dati dei clienti non lasciano il computer
 
 **Decisione.** SQLite locale sotto `data/`, cartella esclusa dal repository

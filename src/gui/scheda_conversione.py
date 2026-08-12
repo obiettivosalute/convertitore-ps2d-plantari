@@ -216,6 +216,14 @@ class SchedaConversione(QWidget):
         self.frame_standard.setToolTip(
             "Usa lo stesso fotogramma dei file prodotti dallo scanner.\n"
             "Togliendo la spunta la griglia si adatta al modello.")
+        self.ritaglia = QCheckBox("isola l'impronta dal piano")
+        self.ritaglia.setChecked(True)
+        self.ritaglia.setToolTip(
+            "Scansionando un calco in schiuma entra anche la superficie piana\n"
+            "del blocco attorno all'impronta. Con questa spunta il programma\n"
+            "la riconosce e la toglie, tenendo la sola impronta.\n"
+            "Se non trova un piano evidente non modifica nulla.")
+        self.ritaglia.stateChanged.connect(self._riconverti)
         self.zip_invio = QCheckBox("genera anche lo ZIP di invio")
         self.zip_invio.setChecked(True)
         self.passo_obj = QSpinBox()
@@ -223,6 +231,7 @@ class SchedaConversione(QWidget):
         self.passo_obj.setValue(3)
         self.passo_obj.setToolTip("Passo di campionamento della mesh OBJ, in pixel")
         form_op2.addRow(self.frame_standard)
+        form_op2.addRow(self.ritaglia)
         form_op2.addRow(self.zip_invio)
         form_op2.addRow("Passo mesh OBJ", self.passo_obj)
 
@@ -324,6 +333,7 @@ class SchedaConversione(QWidget):
             ruota_gradi_dx=self.rotazione_dx.currentData(),
             specchia_sx=self.specchia_sx.isChecked(),
             specchia_dx=self.specchia_dx.isChecked(),
+            ritaglia_piano=self.ritaglia.isChecked(),
             passo_obj=self.passo_obj.value(),
             genera_zip_invio=self.zip_invio.isChecked(),
         )
