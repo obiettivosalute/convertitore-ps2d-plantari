@@ -195,10 +195,13 @@ class SchedaConversione(QWidget):
         self.superficie.addItem("pianta del piede (faccia inferiore)", "inferiore")
         self.superficie.addItem("appoggio del plantare (faccia superiore)", "superiore")
         self.superficie.setToolTip(
-            "Su un piede scansionato intero la pianta è la faccia rivolta\n"
-            "verso il basso. Su un plantare già modellato serve invece la\n"
-            "faccia superiore, quella su cui appoggia il piede.\n"
-            "Controlla l'anteprima: l'arco deve risultare rilevato, non incavato.")
+            "Determina il verso della mappa quote.\n\n"
+            "Pianta del piede: per le scansioni della superficie plantare.\n"
+            "Faccia superiore: per plantari già modellati e per i calchi in\n"
+            "schiuma, che sono il negativo dell'impronta.\n\n"
+            "Non serve indovinare: sotto ogni anteprima il programma dice se\n"
+            "il verso è giusto. Deve risultare l'appoggio in rosso e l'arco\n"
+            "in blu; se è tutto rovesciato, cambia questa voce.")
         self.superficie.currentIndexChanged.connect(self._riconverti)
         self.unita = QComboBox()
         self.unita.addItems(["auto", "mm", "cm", "m"])

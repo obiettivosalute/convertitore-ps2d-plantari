@@ -71,20 +71,43 @@ class WidgetAnteprima(QWidget):
             "background:#f4f4f4; border:1px solid #ccc; color:#888;")
         self.immagine.setSizePolicy(QSizePolicy.Policy.Expanding,
                                     QSizePolicy.Policy.Expanding)
+        self.verso = QLabel("")
+        self.verso.setWordWrap(True)
+        self.verso.setStyleSheet("font-size: 11px;")
         self.misure = QLabel("—")
         self.misure.setWordWrap(True)
         self.misure.setStyleSheet("color:#444; font-size: 11px;")
 
         disposizione.addWidget(self.etichetta_titolo)
         disposizione.addWidget(self.immagine, 1)
+        disposizione.addWidget(self.verso)
         disposizione.addWidget(self.misure)
         self._pixmap: QPixmap | None = None
 
     def mostra(self, risultato) -> None:
-        """Aggiorna anteprima e misure a partire dalla conversione."""
+        """Aggiorna anteprima, giudizio sull'orientamento e misure."""
+        from src.ps2d import valuta_verso
+
         immagine = rendi_mappa(risultato.quote_mm, risultato.maschera)
         self._pixmap = QPixmap.fromImage(immagine)
         self._ridisegna()
+
+        esito, dettaglio = valuta_verso(risultato)
+        if esito == "corretto":
+            self.verso.setText(
+                f"✔ appoggio in rosso, arco in blu: verso corretto ({dettaglio})")
+            self.verso.setStyleSheet("color:#161; font-size:11px;")
+        elif esito == "rovesciato":
+            self.verso.setText(
+                f"✘ superficie rovesciata ({dettaglio}) — cambia «Superficie "
+                "da usare»: l'appoggio deve risultare rosso, l'arco blu")
+            self.verso.setStyleSheet("color:#b00; font-size:11px; font-weight:bold;")
+        else:
+            self.verso.setText(
+                f"? verso non riconoscibile ({dettaglio}) — controlla a occhio: "
+                "tallone e avampiede devono essere rossi, l'arco blu")
+            self.verso.setStyleSheet("color:#a60; font-size:11px;")
+
         ys, xs = np.nonzero(risultato.maschera)
         L = (ys.max() - ys.min() + 1) * risultato.mm_per_px
         W = (xs.max() - xs.min() + 1) * risultato.mm_per_px
@@ -100,6 +123,7 @@ class WidgetAnteprima(QWidget):
         self._pixmap = None
         self.immagine.setPixmap(QPixmap())
         self.immagine.setText(messaggio)
+        self.verso.setText("")
         self.misure.setText("—")
 
     def _ridisegna(self) -> None:

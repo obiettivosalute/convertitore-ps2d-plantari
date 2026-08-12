@@ -301,6 +301,44 @@ def quantizza(risultato: RisultatoConversione) -> tuple[np.ndarray, float]:
     return valori, mm_per_unita
 
 
+def valuta_verso(risultato: RisultatoConversione) -> tuple[str, str]:
+    """Dice se la superficie plantare sembra orientata nel verso giusto.
+
+    In una pianta di piede le zone di appoggio — tallone, avampiede, bordo
+    laterale — occupano gran parte dell'area e stanno tutte vicine al
+    sensore; l'arco e' una minoranza che se ne allontana. La distribuzione
+    delle quote e' quindi nettamente asimmetrica, con la massa verso l'alto
+    e una coda verso il basso.
+
+    Sulla scansione autentica usata come riferimento: 81% dell'area nella
+    meta' alta e asimmetria -1,31. Rovesciando l'asse i due valori
+    diventano 19% e +1,31, quindi il criterio separa i due casi con ampio
+    margine.
+
+    Restituisce (esito, spiegazione) con esito in {"corretto", "rovesciato",
+    "incerto"}.
+    """
+    q = risultato.quote_mm[risultato.maschera]
+    if q.size < 100:
+        return "incerto", "troppi pochi punti per giudicare"
+
+    lo, hi = float(q.min()), float(q.max())
+    if hi <= lo:
+        return "incerto", "superficie piatta"
+    area_alta = float((q > (lo + hi) / 2).mean())
+    scarto = float(q.std())
+    asimmetria = float(((q - q.mean()) ** 3).mean() / scarto ** 3) if scarto else 0.0
+
+    dettaglio = (f"area nella metà alta {area_alta*100:.0f}%, "
+                 f"asimmetria {asimmetria:+.2f}")
+
+    if area_alta >= 0.60 and asimmetria <= -0.30:
+        return "corretto", dettaglio
+    if area_alta <= 0.40 and asimmetria >= 0.30:
+        return "rovesciato", dettaglio
+    return "incerto", dettaglio
+
+
 def controlla_plausibilita(risultato: RisultatoConversione) -> list[str]:
     """Verifiche di buon senso sulle dimensioni, per intercettare unita' errate."""
     from config import (ALTEZZA_MASSIMA_ATTESA_MM, ALTEZZA_MINIMA_ATTESA_MM,
