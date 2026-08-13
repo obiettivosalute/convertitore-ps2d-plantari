@@ -68,6 +68,13 @@ PostgreSQL.
 in sola lettura, per non reinserire clienti già noti. Il modello dati è già
 predisposto.
 
+È il primo passo di un disegno più ampio, fissato il 13 agosto 2026: il
+gestionale diventa un'app innestata in `prese misure` come blueprint
+`/scanner`, si apre su tablet, prende la scheda paziente da lì, acquisisce
+i due piedi e recapita il pacchetto al PC della fresa su cartella condivisa
+— niente mail, perché sono dati sanitari. Forma, vincoli e ordine dei passi
+stanno in [[Evoluzione in app dentro prese misure]].
+
 **Esportazione in serie.** Una modalità da riga di comando che converta una
 cartella di modelli, utile quando arrivano più lavorazioni insieme.
 
