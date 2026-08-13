@@ -44,6 +44,13 @@ fascia consumer offre un SDK per pilotarlo dall'esterno, ma tutti salvano in
 una cartella: il gestionale può sorvegliarla e importare da solo il file
 appena compare. Serve sapere marca, modello e cartella di esportazione.
 
+La valutazione dell'hardware e delle tre strade possibili sta in
+[[Scelta dello scanner e acquisizione]]: in breve, uno scanner chiavi in
+mano non si comanda dal nostro software, quindi il gesto si ottiene
+sorvegliando la cartella di esportazione. Perché il gestionale si apra su
+un tablet va però rifatto come web app, e quella è la parte di lavoro
+grossa — indipendente dallo scanner.
+
 Pista nuova, dal 13 agosto: paro360 prevede nativamente un'**API
 RemoteScan** (`api.schemas.cadenas.de/pcs/commands/remotescan`) e il suo
 schema dei moduli mostra un «Paroscan REMOTE, other location». Riguarda il
