@@ -68,12 +68,23 @@ PostgreSQL.
 in sola lettura, per non reinserire clienti già noti. Il modello dati è già
 predisposto.
 
-È il primo passo di un disegno più ampio, fissato il 13 agosto 2026: il
-gestionale diventa un'app innestata in `prese misure` come blueprint
-`/scanner`, si apre su tablet, prende la scheda paziente da lì, acquisisce
-i due piedi e recapita il pacchetto al PC della fresa su cartella condivisa
-— niente mail, perché sono dati sanitari. Forma, vincoli e ordine dei passi
-stanno in [[Evoluzione in app dentro prese misure]].
+È l'**ultimo** passo di un disegno più ampio, fissato il 13 agosto 2026: il
+gestionale diventa un'app che si apre su tablet, prende la scheda paziente,
+acquisisce i due piedi e recapita il pacchetto al PC della fresa su cartella
+condivisa — niente mail, perché sono dati sanitari e tutto resta in azienda.
+
+Si procede in due tempi: **prima l'applicazione web autonoma**, provata sul
+campo con lo scanner vero, **poi** l'innesto in `prese misure` come
+blueprint `/scanner`. Così la produzione non corre rischi e le due strade
+avanzano in parallelo. Forma, vincoli e ordine dei passi stanno in
+[[Evoluzione in app dentro prese misure]].
+
+Fra i passi previsti c'è anche il **riconoscimento di destro e sinistro**
+come controllo dell'operatore: cosa diversa da `valuta_verso()`, che
+giudica solo il verso verticale. L'arco sta sul lato mediale, quindi da che
+parte cade la zona bassa della mappa quote dice qual è il piede. Il sistema
+propone lo scambio dell'etichetta, non specchia la geometria: specchiarla
+darebbe un plantare per il piede sbagliato.
 
 **Esportazione in serie.** Una modalità da riga di comando che converta una
 cartella di modelli, utile quando arrivano più lavorazioni insieme.

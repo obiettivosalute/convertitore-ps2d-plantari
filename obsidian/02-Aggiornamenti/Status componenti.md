@@ -28,6 +28,9 @@ Aggiornato al 13 agosto 2026.
 | Documentazione formato | `docs/FORMATO_PS2D.md` | **fatto** | specifica completa, con le due convenzioni del `.farima` |
 | Prova di import | — | **superata** | il pacchetto generato si apre e arriva alla modellazione |
 | Taratura su calco vero | — | **da fare** | soglie del ritaglio e orientamento dello scanner |
+| Riconoscimento destro/sinistro | — | **da fare** | controllo sull'etichetta scelta dall'operatore; l'arco sta sul lato mediale. Vedi [[Evoluzione in app dentro prese misure]] |
+| Interfaccia web (fase A) | — | **da fare** | applicazione autonoma sopra `servizio.py`, che e' gia' senza Qt |
+| Innesto in `prese misure` (fase B) | — | **da fare** | blueprint isolato, anagrafica in sola lettura |
 | Acquisizione diretta (fase 2) | — | **da fare** | dipende dallo scanner, non ancora acquistato |
 | Aggancio a `prese misure` | — | **da fare** | anagrafica in sola lettura |
 

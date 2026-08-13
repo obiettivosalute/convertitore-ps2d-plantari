@@ -49,6 +49,13 @@ canale peggiore per muoverli. L'esito della scrittura diventa lo stato
 «consegnato» nella lavorazione, che la posta non avrebbe mai dato con
 certezza.
 
+È anche un miglioramento rispetto a **come si lavorava prima**: con il
+vecchio sistema si scansionava dal tablet con il programma del fornitore e
+il file finiva alla fresa **via mail**. La cartella condivisa toglie quel
+passaggio e con esso l'unico punto in cui i dati uscivano dalla rete
+aziendale. Da qui in avanti **tutto resta dentro l'azienda, niente esce**:
+è un vincolo del progetto, non una preferenza.
+
 **Come arriva l'STL dal tablet al server.** Revo Scan esporta in una
 cartella del tablet, che il server non vede. Due modi, in ordine di
 preferenza:
@@ -65,32 +72,62 @@ Se si preferisce non installare niente sul tablet, resta la terza via:
 scheda sul tablet ma si scansiona dal PC, dove la cartella sorvegliata
 funziona senza intermediari.
 
-## Le cose che vanno decise prima di scrivere codice
+## Le decisioni prese
 
-**Quale piede è quale.** Il sistema deve saperlo. La soluzione minima è
-che l'interfaccia lo chieda prima di ogni acquisizione — «ora il destro» —
-e assegni per ordine di arrivo. Va progettata dentro, non aggiunta dopo.
+**Le immagini nella scheda paziente: mappa quote a colori.** Va sciolto un
+equivoco che sta a monte: la conversione mesh → mappa quote **butta via la
+texture**, e il `.farima` che generiamo non è una foto del piede ma una
+tinta neutra sintetica, calcolata dall'ombreggiatura. Una fotografia a
+colori dello scan, oggi, non esiste nel nostro pacchetto.
 
-**Le immagini nella scheda paziente.** Attenzione a un equivoco: la
-conversione mesh → mappa quote **butta via la texture**, e il `.farima`
-che generiamo non è una foto del piede ma una tinta neutra sintetica,
-calcolata dall'ombreggiatura. «Vedere le due immagini a colori dello scan»
-oggi non è possibile così com'è.
+Si mostra quindi la **mappa quote a colori**, quella che il gestionale già
+disegna in `src/gui/anteprima.py`: rosso l'appoggio, blu l'arco, isoipse
+ogni 5 mm. È quasi gratis ed è clinicamente più utile di una fotografia,
+perché ci si leggono l'arco e le zone di carico.
 
-Due strade. Conservare la texture del POP 4 come allegato della
-lavorazione — lavoro in più, e non entra nel PS2D. Oppure mostrare la
-**mappa quote a colori**, che il gestionale già disegna in
-`src/gui/anteprima.py`: rosso l'appoggio, blu l'arco, isoipse ogni 5 mm.
-È quasi gratis ed è clinicamente più utile di una fotografia, perché ci si
-leggono l'arco e le zone di carico. Salvo indicazione contraria è questa
-la strada.
+**Come arriva l'STL al server: si vagliano entrambe le strade sul campo.**
+Sincronizzazione della cartella o caricamento dal browser, la scelta si fa
+quando si arriva al punto 3, con lo scanner in mano.
+
+**Quale piede è quale: lo si chiede, ma lo si verifica.** L'interfaccia lo
+chiede prima di ogni acquisizione — «ora il destro» — e assegna per ordine
+di arrivo, ma il sistema **controlla la geometria** e avvisa se non torna.
+Vedi la sezione seguente.
+
+## Riconoscere destro e sinistro: da fare
+
+Da non confondere con quello che c'è già. `valuta_verso()` in
+`src/ps2d/mesh2height.py` giudica il verso **verticale** — se la pianta
+guarda il sensore o se è rovesciata — dalla distribuzione delle quote:
+sulla scansione di riferimento l'81% dell'area sta nella metà alta, con
+asimmetria −1,31, e rovesciando l'asse i valori si invertono con ampio
+margine. Non dice nulla su quale piede sia.
+
+Distinguere destro da sinistro è un'altra misura, e si può fare: **l'arco
+sta sul lato mediale**, quindi la mappa quote è asimmetrica rispetto
+all'asse longitudinale, e da che parte cade la zona bassa dice qual è il
+piede. È lo stesso genere di criterio già usato per il verso, applicato
+all'altro asse.
+
+**Attenzione a cosa deve significare «il sistema sistema».** Se l'operatore
+ha detto «destro» e la geometria dice sinistro, la correzione giusta è
+**scambiare l'etichetta**, non specchiare la geometria: specchiarla
+produrrebbe un plantare per il piede sbagliato, che è un danno vero, non un
+fastidio. E se **entrambe** le scansioni risultassero lo stesso piede, il
+sistema non deve indovinare: si ferma e chiede, perché o si è scansionato
+due volte lo stesso piede o il criterio ha sbagliato.
+
+Per lo stesso motivo il controllo **propone** e non corregge in silenzio:
+su un prodotto che finisce sotto il piede di una persona, un riconoscimento
+che sbaglia da solo è peggio dell'errore che previene. L'operatore conferma
+con un tocco.
 
 ## Vincoli da rispettare
 
 **`prese misure` è in produzione**, ci si lavora tutti i giorni. L'innesto
-deve essere un blueprint isolato: sue rotte, sue tabelle, **nessuna
-modifica alle viste esistenti**. Altrimenti un guasto dello scanner
-diventa un guasto delle fatture.
+arriva per ultimo (fase B) e deve essere un blueprint isolato: sue rotte,
+sue tabelle, **nessuna modifica alle viste esistenti**. Altrimenti un
+guasto dello scanner diventa un guasto delle fatture.
 
 **L'anagrafica si legge in sola lettura.** Le schede paziente restano di
 `prese misure`; il modulo scanner non le crea e non le modifica.
@@ -98,20 +135,52 @@ diventa un guasto delle fatture.
 **I dati restano in sede.** Nessun pacchetto su servizi esterni, nessuna
 mail con dati sanitari: cartella condivisa sulla rete locale.
 
+## Due tempi: prima autonomo, poi innestato
+
+Deciso il 13 agosto 2026, ed è la scelta che tiene al riparo la
+produzione. **Non si parte innestando.** Si costruisce prima la versione
+web come applicazione **a sé stante**, la si prova sul campo con lo
+scanner vero, e solo quando funziona la si innesta in `prese misure`.
+
+Tre motivi. Il primo è che si sbaglia molto, all'inizio, e sbagliare su un
+programma isolato non costa niente mentre sbagliare dentro `prese misure`
+ferma il lavoro di tutti. Il secondo è che così le due strade restano
+percorribili in parallelo: chi lavora allo scanner non aspetta chi lavora
+alle fatture. Il terzo è che l'innesto, fatto alla fine su codice già
+collaudato, si riduce a registrare un blueprint e a cambiare da dove si
+prende l'anagrafica — un giorno di lavoro invece di un rischio continuo.
+
+Perché questo funzioni, una regola sola: **il modulo non deve mai dare per
+scontato di essere dentro `prese misure`**. L'anagrafica si prende da
+un'interfaccia sottile, che nella versione autonoma legge dall'archivio
+locale e nella versione innestata legge da quella di `prese misure`. Se
+questa separazione si rispetta dal primo giorno, l'innesto è indolore; se
+si perde, va riscritto tutto.
+
 ## Ordine in cui conviene procedere
 
-1. **Blueprint `/scanner` che elenca le lavorazioni esistenti** leggendo
-   l'anagrafica di `prese misure`. Nessuna acquisizione, solo lettura:
-   serve a validare l'innesto senza rischi
+**Fase A — applicazione autonoma**
+
+1. **Interfaccia web che elenca clienti e lavorazioni** dall'archivio
+   locale, sola lettura. Serve a mettere in piedi il guscio Flask sopra il
+   motore che c'è già
 2. **Caricamento manuale dei due modelli** e chiamata a `esporta()`. Da
    qui il flusso è già completo, solo con un tocco in più
-3. **Cartella sorvegliata**, che sostituisce il caricamento manuale
+3. **Cartella sorvegliata**, che sostituisce il caricamento manuale. Qui
+   si decide fra sincronizzazione dal tablet e caricamento dal browser
 4. **Consegna alla fresa** sulla cartella condivisa, con stato «consegnato»
-5. **Vista della scheda paziente** con le mappe quote dei due piedi
-6. Eventuale sincronizzazione dal tablet, se si sceglie quella strada
+5. **Scheda con le mappe quote a colori** dei due piedi
+6. **Riconoscimento di destro e sinistro** come controllo, con proposta di
+   scambio all'operatore
+
+**Fase B — innesto in `prese misure`**
+
+7. Blueprint `/scanner` isolato, e l'interfaccia dell'anagrafica che passa
+   a leggere le schede paziente di `prese misure` in sola lettura
 
 I primi due passi danno già un sistema usabile. Dal terzo in poi si tolgono
-gesti all'operatore.
+gesti all'operatore. Il settimo non aggiunge funzioni: cambia solo dove
+vive il modulo e da dove prende i nomi.
 
 ## Cosa resta com'è
 
