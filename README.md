@@ -87,19 +87,25 @@ ferma se ciò che resterebbe è troppo piccolo per essere un'impronta o se
 butterebbe via la maggior parte dell'acquisito: un plantare già modellato ha
 una base piatta che somiglia molto a un piano d'appoggio.
 
-## Da verificare
+## Formato validato
 
-Resta da confermare che il software di modellazione apra senza errori un
-pacchetto scritto da questo programma. Lo strumento apposito costruisce un
-file di prova dalla geometria di una scansione autentica, riscritta per
-intero, con anagrafica di fantasia:
+Il 13 agosto 2026 il software di modellazione ha importato un pacchetto
+scritto interamente da questo programma: apre entrambi i piedi con
+l'orientamento corretto e arriva alla pagina di modellazione.
+
+Ci sono voluti tre giri. Il guasto era il `.farima`, che va scritto
+**capovolto** rispetto al `.sca` e il cui chunk `pHYs` deve dichiarare la
+scala vera della griglia. È stato isolato generando una serie di pacchetti
+in cui si sostituisce **un layer alla volta**, e chiedendo al software
+quale rifiutasse:
 
 ```bash
 py -3 strumenti\genera_prova_import.py <pacchetto_originale.ps2d>
+py -3 strumenti\genera_prove_ibride.py [--solo farima,completo] [--giro N]
 ```
 
-Se si apre come l'originale, il formato è validato. Dettagli in
-`obsidian/03-Anomalie/Verifiche aperte.md`.
+Il racconto sta in `obsidian/03-Anomalie/Import rifiutato - indagine.md`,
+la specifica in `docs/FORMATO_PS2D.md`.
 
 ## Dati personali
 

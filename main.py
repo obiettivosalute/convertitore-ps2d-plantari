@@ -14,17 +14,55 @@ RADICE = Path(__file__).resolve().parent
 if str(RADICE) not in sys.path:
     sys.path.insert(0, str(RADICE))
 
+# Librerie richieste, come (nome da importare, nome da installare).
+LIBRERIE = (("numpy", "numpy"), ("scipy", "scipy"), ("PIL", "Pillow"),
+            ("trimesh", "trimesh"), ("PyQt6", "PyQt6"))
+
+
+def importabile(modulo: str) -> bool:
+    try:
+        __import__(modulo)
+    except ImportError:
+        return False
+    return True
+
+
+def librerie_mancanti() -> list[str]:
+    """Pacchetti da installare, fra quelli che servono al gestionale."""
+    return [pacchetto for modulo, pacchetto in LIBRERIE
+            if not importabile(modulo)]
+
+
+def avvisa_librerie(mancanti: list[str]) -> None:
+    """Comunica quali librerie mancano, console o non console.
+
+    Con il doppio clic l'applicazione parte sotto pythonw.exe, che non ha
+    finestra di testo: quello che si stampa non lo legge nessuno e sembra
+    semplicemente che non succeda niente. Se PyQt6 c'e' — e manca solo
+    qualcos'altro — l'avviso passa quindi da una finestra di dialogo.
+    """
+    testo = ("Mancano queste librerie:\n\n  "
+             + "\n  ".join(mancanti)
+             + "\n\nPer installarle, da un prompt dei comandi:\n\n"
+             + "  py -3 -m pip install " + " ".join(mancanti))
+    print(testo)
+
+    if not importabile("PyQt6"):
+        return
+    from PyQt6.QtWidgets import QApplication, QMessageBox
+
+    from config import APP_NOME
+    applicazione = QApplication.instance() or QApplication(sys.argv)
+    QMessageBox.critical(None, f"{APP_NOME} — librerie mancanti", testo)
+
 
 def controlla_ambiente() -> int:
     """Verifica che le librerie necessarie siano installate."""
     mancanti: list[str] = []
-    for modulo, pacchetto in (("numpy", "numpy"), ("scipy", "scipy"),
-                              ("PIL", "Pillow"), ("trimesh", "trimesh"),
-                              ("PyQt6", "PyQt6")):
-        try:
-            __import__(modulo)
+    for modulo, pacchetto in LIBRERIE:
+        if importabile(modulo):
             print(f"  {pacchetto:12s} presente")
-        except ImportError:
+        else:
             print(f"  {pacchetto:12s} MANCANTE")
             mancanti.append(pacchetto)
 
@@ -59,11 +97,15 @@ def main() -> int:
             return 2
         return ispeziona(sys.argv[i + 1])
 
-    try:
-        from PyQt6.QtWidgets import QApplication
-    except ImportError:
-        print("PyQt6 non è installato. Esegui:  py -3 -m pip install PyQt6")
+    # Il controllo va fatto qui, prima di toccare src.gui: da li' in avanti
+    # la catena di import arriva a scipy e trimesh, e senza di loro l'avvio
+    # muore con un traceback che non dice all'utente cosa fare.
+    mancanti = librerie_mancanti()
+    if mancanti:
+        avvisa_librerie(mancanti)
         return 1
+
+    from PyQt6.QtWidgets import QApplication
 
     from config import APP_NOME
     from src.gui import FinestraPrincipale

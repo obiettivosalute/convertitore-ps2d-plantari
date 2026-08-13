@@ -95,12 +95,27 @@ Lo sfondo è bianco (255). Non è una riduzione del `.sca`: nei file reali la
 correlazione fra i due è debole (0,29 sul piede sinistro, 0,77 sul destro),
 quindi si tratta dell'immagine ottica della camera, non della profondità.
 
-**`.farima`** — PNG RGBA con la foto a colori della pianta. Il canale alfa
-è la maschera dei pixel validi e coincide con le celle non-sfondo del
-`.sca`. Nei file reali il colore medio dell'area opaca è intorno a
-(103, 114, 122), cioè pelle in luce fredda. Porta il chunk **`pHYs`** a
-72 dpi: con Pillow lo si ottiene passando `dpi` al salvataggio, perché i
-chunk noti aggiunti a mano fra i metadati vengono scartati.
+**`.farima`** — PNG RGBA con la foto a colori della pianta. Nei file reali
+il colore medio dell'area opaca è intorno a (103, 114, 122), cioè pelle in
+luce fredda.
+
+Due dettagli sono vincolanti, e sbagliarli impedisce l'apertura della
+scansione. Sono stati isolati il 13 agosto 2026 con i pacchetti ibridi: di
+sei layer messi alla prova uno per volta, il `.farima` è stato l'unico a
+far fallire l'import.
+
+**Il PNG è memorizzato capovolto rispetto al `.sca`.** Il canale alfa è la
+maschera dei pixel validi, ma coincide con le celle non-sfondo del `.sca`
+solo dopo aver rovesciato l'ordine delle righe: le due rappresentazioni
+contano la riga zero da estremi opposti. Attenzione, la convenzione **non**
+è uniforme fra i layer: l'`.ima` va invece nello stesso verso del `.sca`.
+
+**Il chunk `pHYs` dichiara la scala vera della griglia**, non un valore di
+comodo: 2000 pixel per metro, cioè mille millimetri diviso il passo da
+0,5 mm. Con Pillow lo si ottiene passando `dpi` al salvataggio (i chunk
+noti aggiunti a mano fra i metadati vengono scartati), facendo il giro
+inverso: `dpi = pixel_per_metro × 0,0254`. Scrivere il default di 72 dpi
+produce 2835 px/m, che è un numero senza significato fisico.
 
 **`.bmp`** — Malgrado il nome è un **JPEG** in scala di grigi con EXIF, non
 un bitmap. Sfondo scuro, correlazione negativa con il `.sca` (−0,70): è una

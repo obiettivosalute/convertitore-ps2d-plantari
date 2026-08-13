@@ -2,16 +2,14 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import (QFileDialog, QMainWindow, QMessageBox, QTabWidget,
-                             QTextEdit, QVBoxLayout, QWidget)
+from PyQt6.QtWidgets import (QFileDialog, QMainWindow, QMessageBox,
+                             QTabWidget)
 
 from config import APP_NOME, APP_VERSIONE, ARCHIVIO_DIR, DATA_DIR
 from src.db import Archivio
-from src.ps2d import descrivi, leggi_ps2d
+from src.ps2d import leggi_ps2d
 
+from .ispezione import FinestraIspezione
 from .scheda_archivio import SchedaArchivio, apri_nel_gestore_file
 from .scheda_clienti import SchedaClienti
 from .scheda_conversione import SchedaConversione
@@ -68,21 +66,11 @@ class FinestraPrincipale(QMainWindow):
             return
         try:
             contenuto = leggi_ps2d(percorso)
-            testo = descrivi(contenuto)
         except Exception as exc:
             QMessageBox.critical(self, "Lettura non riuscita", str(exc))
             return
 
-        finestra = QWidget(self, Qt.WindowType.Window)
-        finestra.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
-        finestra.setWindowTitle(Path(percorso).name)
-        finestra.resize(760, 320)
-        disposizione = QVBoxLayout(finestra)
-        area = QTextEdit()
-        area.setReadOnly(True)
-        area.setStyleSheet("font-family: Consolas, monospace;")
-        area.setPlainText(testo)
-        disposizione.addWidget(area)
+        finestra = FinestraIspezione(contenuto, self)
         finestra.show()
 
     def _informazioni(self) -> None:

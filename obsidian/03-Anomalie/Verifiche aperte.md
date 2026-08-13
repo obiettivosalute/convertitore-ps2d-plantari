@@ -1,6 +1,22 @@
 # Verifiche aperte
 
-## V1 — Il software accetta i pacchetti che generiamo? *(chiarita in parte)*
+## V1 — Il software accetta i pacchetti che generiamo? ✅ *(chiusa il 13 agosto 2026)*
+
+**Sì.** Un pacchetto scritto interamente da noi viene importato, apre
+entrambi i piedi e arriva alla pagina di modellazione, con l'orientamento
+corretto: punta e arco al posto giusto, niente capovolgimenti né
+specchiature.
+
+Ci sono voluti tre giri. Il guasto era il `.farima`: va scritto
+**capovolto** rispetto al `.sca`, e il suo chunk `pHYs` deve dichiarare la
+scala vera della griglia (2000 px/m) invece dei 72 dpi di default. Isolato
+con la serie dei pacchetti ibridi, corretto in `src/ps2d/writer.py`. Il
+racconto completo sta in [[Import rifiutato - indagine]].
+
+Quel che segue è la storia della verifica, lasciata perché spiega come ci
+si è arrivati.
+
+---
 
 **Come funziona davvero il flusso** (chiarito il 12 agosto 2026). Il `.ps2d`
 non è il file che va alla fresa: è **l'input del software di modellazione**
@@ -76,12 +92,19 @@ giusta. Una volta trovata, conviene renderla predefinita in `config.py`.
 
 ---
 
-## V2 — Griglia di dimensione variabile
+## V2 — Griglia di dimensione variabile *(quasi risolta)*
 
 Nei due esempi la griglia è 340 × 684 e 342 × 685: **non è fissa**. In
 lettura si prende sempre dall'header. In scrittura si usa il valore più
 ricorrente, ma non è confermato che la fresa accetti griglie diverse da
-quelle che produce il suo scanner. Da chiarire nella stessa prova di V1.
+quelle che produce il suo scanner.
+
+**Indizio forte dal 13 agosto 2026.** Il pacchetto autentico porta le due
+griglie diverse **nello stesso pacchetto**, una per piede, e il software lo
+apre senza storie — così come apre il nostro, che le replica. Il lettore
+prende dunque la dimensione dall'header, come facciamo noi. Resta da vedere
+solo se esistano limiti superiori o inferiori, cosa che si scoprirà con lo
+scanner nuovo.
 
 ---
 

@@ -20,29 +20,38 @@ pacchetto sia rigenerabile in futuro.
 | `03-Anomalie` | Problemi noti e verifiche ancora aperte |
 | `04-Roadmap` | Cosa manca e in che ordine |
 
-## A che punto siamo — 12 agosto 2026
+## A che punto siamo — 13 agosto 2026
 
-Il gestionale è completo e collaudato. Manca la conferma che il software di
-modellazione accetti i pacchetti generati: alla prima prova lo ZIP viene
-accettato e il paziente creato correttamente, ma le immagini non si aprono.
-Le difformità rispetto ai file autentici sono state trovate e corrette, e
-**due pacchetti sono in prova presso il tecnico**.
+**Il formato è validato.** Un pacchetto scritto interamente da noi viene
+importato dal software di modellazione, apre entrambi i piedi con
+l'orientamento corretto e arriva alla pagina di modellazione. Il gestionale
+è completo, collaudato e accettato dalla fresa.
 
-Alla ripresa, la prima domanda da fare è quale dei due — CONTROLLO FORMATO o
-PROVA IMPORT — ha dato quale esito: la tabella in
-[[2026-08-12 - Sessione 3, prima prova di import]] dice come proseguire in
-ciascun caso.
+Il guasto delle prime due prove era il `.farima`: va scritto **capovolto**
+rispetto al `.sca`, e il suo chunk `pHYs` deve dichiarare la scala vera
+della griglia. È stato isolato generando una serie di pacchetti ibridi, uno
+per layer, e chiedendo al software quale rifiutasse. Il racconto sta in
+[[Import rifiutato - indagine]].
+
+Da qui in avanti il progetto **dipende dallo scanner**, che non è ancora
+stato acquistato. Alla ripresa non c'è nessuna domanda in sospeso: si
+sceglie da [[Roadmap]].
 
 ## Punti fermi
 
 - Il formato PS2D è stato ricostruito per reverse engineering: la specifica
-  completa sta in `docs/FORMATO_PS2D.md`.
+  completa sta in `docs/FORMATO_PS2D.md`. Il registro dei formati di
+  paro360 ne ha poi confermato firme ed estensioni.
 - La geometria vive nel layer `.sca`, una mappa quote a 16 bit su griglia da
   0,5 mm. Tutto il resto è derivato.
+- **Il verso delle righe non è uniforme fra i layer**: il `.farima` va
+  capovolto rispetto al `.sca`, l'`.ima` no. È la trappola che è costata
+  due giri di prove.
+- Al lettore della fresa non importano mesh più rada, immagini
+  risintetizzate, ordine dei file nello ZIP né fattore di quota
+  ricalcolato: si è verificato sul campo che li accetta tutti.
 - L'archivio clienti resta **sul computer**: sono dati sanitari e la cartella
   `data/` è esclusa dal repository.
-- Resta da confermare sul campo come il software della fresa interpreti i
-  pacchetti generati. Vedi [[Verifiche aperte]].
 
 ## Collegamenti
 

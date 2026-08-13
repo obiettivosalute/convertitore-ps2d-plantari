@@ -1,5 +1,12 @@
 # «La scansione non può essere aperta» — indagine
 
+> **CHIUSA il 13 agosto 2026.** Era il `.farima`, per due difetti insieme:
+> il PNG va scritto **capovolto** rispetto al `.sca`, e il chunk `pHYs`
+> deve dichiarare la scala vera della griglia (2000 px/m) invece dei 72 dpi
+> di default. Corretto in `src/ps2d/writer.py`; il pacchetto rigenerato si
+> apre e arriva alla modellazione. Il racconto sta in fondo, sotto
+> [[#L'esito, 13 agosto 2026]].
+
 ## Il riscontro del 12 agosto 2026
 
 Primo pacchetto generato, provato dal tecnico sul software di modellazione:
@@ -74,6 +81,69 @@ con tutte le correzioni sopra.
 Nel terzo caso il sospetto si sposterebbe sulla marca temporale nei nomi o su
 un vincolo dell'anagrafica, e servirebbe il programma dell'azienda per
 capire quali controlli esegue in lettura.
+
+---
+
+## L'esito, 13 agosto 2026
+
+Si è verificato il **secondo caso**: il controllo si apre e arriva alla
+modellazione, la prova no. L'involucro e il `.his` sono quindi assolti, e
+il guasto è nei layer che generiamo.
+
+### La serie degli ibridi
+
+`strumenti/genera_prove_ibride.py` parte dal pacchetto di controllo e ne
+produce una copia per ciascun layer, sostituendo **quel solo layer** con la
+nostra versione. Sei pacchetti in una consegna sola, anagrafiche diverse
+per distinguerli in elenco.
+
+| Ibrido | Esito |
+|---|---|
+| `.sca` nostro | si apre |
+| `.ima` nostro | si apre |
+| `.bmp` nostro | si apre |
+| `.obj` nostro | si apre |
+| `.farima` nostro | **non si apre** |
+| tutti nostri, `.bmp` riallineato | **non si apre** |
+
+Il sesto conferma per esclusione: conteneva il nostro `.farima`, quindi il
+`.bmp` non era in causa.
+
+### Cosa aveva di rotto il `.farima`
+
+**Il verso delle righe.** Nei file autentici l'alfa del `.farima` ha lo
+stesso numero di pixel opachi della maschera del `.sca` — 146.020 sul
+sinistro, 78.582 sul destro — ma in posizioni diverse: la trasformazione
+che le fa combaciare è il capovolgimento delle righe. Noi lo scrivevamo nel
+verso del `.sca`, e il lettore trovava una maschera che non tornava.
+
+La convenzione **non è uniforme fra i layer**: l'`.ima` va invece nello
+stesso verso del `.sca`. È per questo che non era emersa prima.
+
+**Il `pHYs`.** L'originale dichiara 2000 px/m, cioè mille millimetri
+diviso il passo da 0,5 mm: la scala fisica della scansione. Scrivevamo
+2835, il default di Pillow per 72 dpi.
+
+### Il sospetto sbagliato
+
+L'`.obj` privo di `# End of file.` sembrava il candidato naturale. Era già
+stato corretto — il file ora apre con `# Generated.`, chiude con
+`# End of file.`, zero CRLF — e falliva lo stesso; l'ibrido con il solo
+`.obj` nostro si apre senza problemi. Vale la pena ricordarlo: la
+spiegazione più elegante non era quella giusta, e a deciderlo è stato
+l'esperimento, non il ragionamento.
+
+Allo stesso modo, l'EXIF aggiunto al `.bmp` il 12 agosto aveva introdotto
+una densità in dpi (`units=1`) che l'originale non dichiara (`units=0`):
+sembrava una pista, non lo era. La modifica è rimasta perché innocua.
+
+### Cosa resta diverso, e non dà fastidio
+
+Il pacchetto generato si apre pur avendo ancora, rispetto all'originale:
+mesh più rada (4.920 vertici contro 10.963 sul destro), `.ima` e `.bmp`
+risintetizzati invece che ripresi dalla camera, JPEG senza i segmenti
+`APP13` e `DRI` di Photoshop, e i file in ordine diverso dentro lo ZIP.
+Nessuna di queste cose conta per il lettore.
 
 ## Collegamenti
 

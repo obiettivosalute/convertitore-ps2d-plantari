@@ -86,7 +86,16 @@ def genera_ima(quote_mm: np.ndarray, maschera: np.ndarray,
 
 def genera_farima(quote_mm: np.ndarray, maschera: np.ndarray,
                   mm_per_px: float) -> Image.Image:
-    """PNG RGBA: il canale alfa e' la maschera dei pixel validi."""
+    """PNG RGBA: il canale alfa e' la maschera dei pixel validi.
+
+    Il PNG va scritto **capovolto** rispetto al .sca. Nei file autentici il
+    canale alfa coincide con la maschera della mappa quote solo dopo aver
+    rovesciato le righe: le due rappresentazioni contano la riga zero da
+    estremi opposti. Scriverlo nello stesso verso del .sca fa fallire
+    l'apertura della scansione -- e' il guasto isolato con i pacchetti
+    ibridi del 13 agosto 2026, quando l'ibrido con il solo .farima nostro
+    e' stato l'unico a non aprirsi.
+    """
     sh = _ombreggiatura(quote_mm, maschera, mm_per_px)
     base = np.array([182, 168, 158], dtype=np.float64)     # tinta neutra
     rgb = (base[None, None, :] * (0.45 + 0.55 * sh[..., None])).clip(0, 255)
@@ -94,7 +103,17 @@ def genera_farima(quote_mm: np.ndarray, maschera: np.ndarray,
     out[..., :3] = rgb.astype(np.uint8)
     out[..., 3] = np.where(maschera, 255, 0).astype(np.uint8)
     out[~maschera, :3] = 0
-    return Image.fromarray(out, mode="RGBA")
+    return Image.fromarray(out[::-1], mode="RGBA")
+
+
+def pixel_per_metro(mm_per_px: float) -> int:
+    """Risoluzione fisica da dichiarare nel chunk pHYs del PNG.
+
+    Gli originali portano 2000 px/m, che e' esattamente la griglia da
+    0,5 mm: mille millimetri al metro diviso il passo. Non e' un numero
+    convenzionale, e' la scala della scansione.
+    """
+    return int(round(1000.0 / mm_per_px))
 
 
 def _exif_base(larghezza: int, altezza: int) -> bytes:
@@ -213,8 +232,13 @@ def scrivi_lato(cartella: Path, paziente: DatiPaziente, lato: str,
     # discostarsi da cio' che il lettore e' abituato a ricevere. Il chunk
     # pHYs si ottiene passando dpi al salvataggio: aggiunto a mano fra i
     # metadati verrebbe scartato, perche' Pillow gestisce da se' i chunk noti.
+    # Il valore non e' libero: deve dichiarare la scala vera della griglia,
+    # 2000 px/m per il passo da 0,5 mm. Il 72 dpi scritto prima era il
+    # default di Pillow e non voleva dire niente. Pillow converte i dpi in
+    # pixel al metro, quindi si fa il giro inverso a partire dalla griglia.
+    ppm = pixel_per_metro(mm_per_px)
     genera_farima(quote_mm, maschera, mm_per_px).save(
-        percorso("farima"), format="PNG", dpi=(72, 72))
+        percorso("farima"), format="PNG", dpi=(ppm * 0.0254, ppm * 0.0254))
     prodotti.append(percorso("farima"))
 
     genera_bmp(quote_mm, maschera, mm_per_px).save(
