@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(python -c ' *)",
-      "Bash(grep -iE \"\\\\.\\(db|sqlite|ps2d|sca|ima|farima|his|stl|obj|ply|3mf\\)$|^data/\")"
-    ]
-  }
-}
